@@ -28,11 +28,11 @@ export default function Navbar() {
         </Link>
         
         <div className={`nav-links ${menuOpen ? 'active' : ''}`}>
-          <Link href="/blogs">Blogs</Link>
-          <Link href="/projects">Projects</Link>
-          <Link href="/ngos">NGOs</Link>
-          {/* <Link href="/impact">Impact</Link> */}
-          {/* <Link href="/about">About</Link> */}
+          <Link href="#process">Process</Link>
+          <Link href="#projects">Projects</Link>
+          <Link href="#blogs">Stories</Link>
+          <Link href="#faqs">FAQs</Link>
+          <Link href="#about">About</Link>
         </div>
         
         <div className="nav-buttons">

@@ -1,10 +1,13 @@
 'use client';
-
+import project1 from './assets/projects.avif';
+import NGO from './assets/ngo.jpg';
+import Blog from './assets/blog.webp';
 import Image from 'next/image';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import About from './assets/about.avif';
 import FAQ from './components/FAQ';
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -56,10 +59,13 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mission">
+      <section id="about" className="mission">
         <div className="mission-content">
           <div className="mission-text">
-            <span className="section-badge">Our Purpose</span>
+            <span className="section-badge">
+              <span className="badge-icon">🌟</span>
+              Our Purpose
+            </span>
             <h2 className="section-title">Transforming Communities Through Action</h2>
             <div className="mission-features">
               <div className="feature-item">
@@ -137,121 +143,136 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="process">
-        <div className="section-header">
-          <span className="section-badge">Process</span>
-          <h2>How It Works</h2>
-          <p>Three simple steps to start making an impact</p>
-        </div>
-        <div className="process-steps">
-          <div className="step-card">
-            <span className="step-number">01</span>
-            <div className="step-icon">👤</div>
-            <h3>Create Profile</h3>
-            <p>Sign up and tell us about your interests and skills. We'll help you find the perfect opportunities.</p>
-          </div>
-          <div className="step-card">
-            <span className="step-number">02</span>
-            <div className="step-icon">🤝</div>
-            <h3>Get Matched</h3>
-            <p>Our AI matches you with projects that align with your skills and interests.</p>
-          </div>
-          <div className="step-card">
-            <span className="step-number">03</span>
-            <div className="step-icon">⭐</div>
-            <h3>Make Impact</h3>
-            <p>Start contributing to meaningful projects and track your impact in real-time.</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="blog">
-        <div className="section-header">
-          <span className="section-badge">Latest Updates</span>
-          <h2>From Our Blog</h2>
-          <p>Stories of impact and innovation</p>
-        </div>
-        <div className="blog-grid">
-          <div className="blog-card">
-            <div className="blog-image">
-              <Image 
-                src="/images/blog1.jpg" 
-                alt="Community Garden" 
-                fill 
-                style={{objectFit: 'cover'}}
-              />
-            </div>
-            <div className="blog-content">
-              <span className="blog-tag">Success Story</span>
-              <h3>Community Garden Initiative</h3>
-              <p>How volunteers transformed an empty lot into a thriving community space</p>
-              <a href="/blog/1" className="blog-link">Read More →</a>
+      <section id="process" className="process">
+        <div className="mission-content">
+          <div className="mission-text">
+            <span className="section-badge">
+              <span className="badge-icon">🎯</span>
+              Process
+            </span>
+            <h2 className="section-title">How It Works</h2>
+            <div className="mission-features">
+              <div className="feature-item">
+                <span className="feature-icon">👤</span>
+                <div>
+                  <h3>Create Profile</h3>
+                  <p>Sign up and tell us about your interests and skills. We'll help you find the perfect opportunities.</p>
+                </div>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">🤝</span>
+                <div>
+                  <h3>Get Matched</h3>
+                  <p>Our AI matches you with projects that align with your skills and interests.</p>
+                </div>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">⭐</span>
+                <div>
+                  <h3>Make Impact</h3>
+                  <p>Start contributing to meaningful projects and track your impact in real-time.</p>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="blog-card">
-            <div className="blog-image">
-              <Image 
-                src="/images/blog2.jpg" 
-                alt="Education Program" 
-                fill 
-                style={{objectFit: 'cover'}}
-              />
-            </div>
-            <div className="blog-content">
-              <span className="blog-tag">Education</span>
-              <h3>Digital Literacy Program</h3>
-              <p>Teaching essential digital skills to underserved communities</p>
-              <a href="/blog/2" className="blog-link">Read More →</a>
-            </div>
-          </div>
-          <div className="blog-card">
-            <div className="blog-image">
-              <Image 
-                src="/images/blog3.jpg" 
-                alt="Environmental Project" 
-                fill 
-                style={{objectFit: 'cover'}}
-              />
-            </div>
-            <div className="blog-content">
-              <span className="blog-tag">Environment</span>
-              <h3>Beach Cleanup Drive</h3>
-              <p>500 volunteers joined forces to clean our local beaches</p>
-              <a href="/blog/3" className="blog-link">Read More →</a>
+          <div className="mission-visual">
+            <div className="process-visual">
+              <svg className="process-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <path fill="var(--primary-light)" d="M47.7,-57.2C59.5,-47.3,65.5,-30.7,67.2,-14.1C68.9,2.5,66.3,19.1,58.5,32.8C50.7,46.5,37.7,57.3,22.7,62.7C7.7,68.1,-9.4,68.1,-25.6,63.1C-41.8,58.1,-57.1,48,-65.1,33.5C-73.1,19,-73.8,0.1,-68.8,-16.3C-63.8,-32.7,-53,-46.5,-39.7,-55.9C-26.3,-65.3,-10.4,-70.3,3.9,-75.1C18.2,-79.9,36.4,-84.5,47.7,-57.2Z" transform="translate(100 100)" />
+                <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="var(--white)" fontSize="40">🚀</text>
+              </svg>
+              <div className="process-counter">
+                <span className="counter-number">3 Steps</span>
+                <span className="counter-label">Simple Process</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="collaborations">
-        <div className="section-header">
-          <span className="section-badge">Partners</span>
-          <h2>Our Collaborations</h2>
-          <p>Working together for greater impact</p>
-        </div>
-        <div className="partner-grid">
-          {/* Add 6 partner logos */}
-          {[1, 2, 3, 4, 5, 6].map((num) => (
-            <div key={num} className="partner-logo">
-              <Image 
-                src={`/images/partner${num}.png`}
-                alt={`Partner ${num}`}
-                width={150}
-                height={60}
-                style={{objectFit: 'contain'}}
-              />
+      <section id="projects" className="projects">
+        <div className="mission-content">
+          <div className="mission-text">
+            <span className="section-badge">
+              <span className="badge-icon">💡</span>
+              Featured Projects
+            </span>
+            <h2 className="section-title">Impact Stories</h2>
+            <div className="mission-features">
+              <div className="feature-item">
+                <span className="feature-icon">📚</span>
+                <div>
+                  <h3>Education Revolution</h3>
+                  <p>How digital literacy programs are transforming rural communities...</p>
+                  <Link href="/blog/education" className="read-more">
+                    Read More <span>→</span>
+                  </Link>
+                </div>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">🌱</span>
+                <div>
+                  <h3>Green Initiative</h3>
+                  <p>Community-led environmental projects making sustainable impact...</p>
+                  <Link href="/blog/environment" className="read-more">
+                    Read More <span>→</span>
+                  </Link>
+                </div>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">💪</span>
+                <div>
+                  <h3>Youth Leadership</h3>
+                  <p>Young volunteers leading social change in urban neighborhoods...</p>
+                  <Link href="/blog/youth" className="read-more">
+                    Read More <span>→</span>
+                  </Link>
+                </div>
+              </div>
             </div>
-          ))}
+          </div>
+          <div className="mission-visual">
+            <div className="project-visual">
+              <svg className="project-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <path fill="var(--primary-light)" d="M54.2,-64.5C69,-52.8,79.2,-35,83.6,-15.3C88,4.4,86.6,26,77.1,42.1C67.6,58.2,50,68.8,31.4,73.7C12.8,78.5,-6.7,77.5,-25.4,71.6C-44.1,65.7,-62,54.8,-71.5,38.5C-81,22.2,-82.1,0.4,-76.3,-17.8C-70.6,-36,-58,-50.6,-43.2,-62.3C-28.4,-74,-14.2,-82.8,2.6,-85.9C19.4,-89,39.4,-76.3,54.2,-64.5Z" transform="translate(100 100)" />
+                <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="var(--white)" fontSize="40">💡</text>
+              </svg>
+              <div className="project-stats">
+                <div className="stat-item">
+                  <span className="stat-number">100+</span>
+                  <span className="stat-label">Success Stories</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="faq">
-        <div className="section-header">
-          <span className="section-badge">FAQ</span>
-          <h2>Common Questions</h2>
-          <p>Everything you need to know</p>
+      <section id="faqs" className="faq">
+        <div className="mission-content">
+          <div className="mission-text">
+            <span className="section-badge">
+              <span className="badge-icon">❓</span>
+              Common Questions
+            </span>
+            <h2 className="section-title">Common Questions</h2>
+            <FAQ />
+          </div>
+          <div className="mission-visual">
+            <div className="faq-visual">
+              <svg className="faq-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <path fill="var(--accent-light)" d="M54.2,-64.5C69,-52.8,79.2,-35,83.6,-15.3C88,4.4,86.6,26,77.1,42.1C67.6,58.2,50,68.8,31.4,73.7C12.8,78.5,-6.7,77.5,-25.4,71.6C-44.1,65.7,-62,54.8,-71.5,38.5C-81,22.2,-82.1,0.4,-76.3,-17.8C-70.6,-36,-58,-50.6,-43.2,-62.3C-28.4,-74,-14.2,-82.8,2.6,-85.9C19.4,-89,39.4,-76.3,54.2,-64.5Z" transform="translate(100 100)" />
+                <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="var(--white)" fontSize="40">❓</text>
+              </svg>
+              <div className="faq-stats">
+                <div className="stat-item">
+                  <span className="stat-number">24/7</span>
+                  <span className="stat-label">Support Available</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <FAQ />
       </section>
       <Footer />
     </main>
