@@ -156,7 +156,7 @@ export default function Home() {
                 <span className="feature-icon">👤</span>
                 <div>
                   <h3>Create Profile</h3>
-                  <p>Sign up and tell us about your interests and skills. We'll help you find the perfect opportunities.</p>
+                  <p>Sign up and tell us about your interests and skills. We&apos;ll help you find the perfect opportunities.</p>
                 </div>
               </div>
               <div className="feature-item">
