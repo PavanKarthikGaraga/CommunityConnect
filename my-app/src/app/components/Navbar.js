@@ -9,30 +9,35 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
+      const heroHeight = window.innerHeight;
+      // Show navbar after scrolling past half of hero section
+      setScrolled(window.scrollY > heroHeight / 2);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Don't render navbar at all if not scrolled
+  if (!scrolled) return null;
+
   return (
-    <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+    <nav className="navbar floating-nav">
       <div className="nav-container">
         <Link href="/" className="logo">
           CommunityConnect
         </Link>
         
         <div className={`nav-links ${menuOpen ? 'active' : ''}`}>
+          <Link href="/blogs">Blogs</Link>
           <Link href="/projects">Projects</Link>
-          <Link href="/volunteers">Volunteers</Link>
           <Link href="/ngos">NGOs</Link>
-          <Link href="/government">Government</Link>
-          <Link href="/about">About</Link>
+          {/* <Link href="/impact">Impact</Link> */}
+          {/* <Link href="/about">About</Link> */}
         </div>
         
         <div className="nav-buttons">
           <Link href="/login" className="btn btn-outline">Login</Link>
-          <Link href="/signup" className="btn btn-primary">Sign Up</Link>
+          <Link href="/get-started" className="btn btn-primary">Get Started</Link>
         </div>
         
         <button 

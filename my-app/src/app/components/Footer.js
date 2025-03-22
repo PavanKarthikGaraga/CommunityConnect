@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import NewsletterForm from './NewsletterForm';
 import './footer.css';
 
 export default function Footer() {
@@ -50,12 +49,6 @@ export default function Footer() {
             <li><Link href="/faq">FAQ</Link></li>
             <li><Link href="/contact">Contact</Link></li>
           </ul>
-        </div>
-
-        <div className="footer-section">
-          <h3>Newsletter</h3>
-          <p>Stay updated with our latest initiatives</p>
-          <NewsletterForm />
         </div>
       </div>
       <div className="footer-bottom">
