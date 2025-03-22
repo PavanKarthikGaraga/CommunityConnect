@@ -36,8 +36,8 @@ export default function Navbar() {
         </div>
         
         <div className="nav-buttons">
-          <Link href="/login" className="btn btn-outline">Login</Link>
-          <Link href="/get-started" className="btn btn-primary">Get Started</Link>
+          <Link href="/auth" className="btn btn-outline">Login</Link>
+          <Link href="/auth" className="btn btn-primary">Get Started</Link>
         </div>
         
         <button 
