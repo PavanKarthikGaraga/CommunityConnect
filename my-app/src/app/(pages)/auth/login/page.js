@@ -1,6 +1,6 @@
 'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { FcGoogle } from 'react-icons/fc';
 import { motion } from 'framer-motion';
@@ -11,6 +11,7 @@ import { useAuth } from '@/AuthContext/AuthContext';
 
 export default function AuthPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, register } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -20,6 +21,18 @@ export default function AuthPage() {
     password: '',
     confirmPassword: ''
   });
+
+  // Check for error parameter
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error) {
+      if (error === 'AuthFailed') {
+        toast.error('Authentication failed. Please try again.');
+      } else {
+        toast.error('An error occurred during authentication.');
+      }
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

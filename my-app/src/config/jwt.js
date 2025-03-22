@@ -2,14 +2,17 @@ import { SignJWT, jwtVerify } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
-export async function createToken(payload) {
-  const token = await new SignJWT(payload)
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('7d')
-    .sign(JWT_SECRET);
-  
-  return token;
+export async function createToken(user) {
+  return await new SignJWT({
+    id: user.id,
+    email: user.email,
+    role: user.role,
+    name: user.name,
+    profileImage: user.profileImage
+  })
+  .setProtectedHeader({ alg: 'HS256' })
+  .setExpirationTime('7d')
+  .sign(JWT_SECRET);
 }
 
 export async function verifyToken(token) {

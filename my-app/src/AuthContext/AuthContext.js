@@ -9,26 +9,56 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
   const checkAuth = async () => {
     try {
+      console.log('Checking authentication status...');
       const response = await fetch('/api/auth/check', {
         credentials: 'include',
       });
       
       if (response.ok) {
         const data = await response.json();
-        setUser(data.user);
-      } else {
-        setUser(null);
+        console.log('Auth check response:', data);
+        
+        if (data.authenticated && data.user) {
+          setUser(data.user);
+          console.log('User authenticated:', data.user);
+          return true;
+        }
       }
-    } catch (error) {
+      
       setUser(null);
+      return false;
+    } catch (error) {
+      console.error('Auth check error:', error);
+      setUser(null);
+      return false;
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    if (!loading && user) {
+      console.log('Redirecting to dashboard:', user.role);
+      router.push(`/dashboard/${user.role}`);
+    }
+  }, [user, loading, router]);
+
+  const logout = async () => {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      setUser(null);
+      router.push('/auth/login');
+    } catch (error) {
+      console.error('Logout error:', error);
     }
   };
 
@@ -50,19 +80,6 @@ export function AuthProvider({ children }) {
       return { success: true };
     } catch (error) {
       return { success: false, error: error.message };
-    }
-  };
-
-  const logout = async () => {
-    try {
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      setUser(null);
-      router.push('/');
-    } catch (error) {
-      console.error('Logout error:', error);
     }
   };
 
@@ -94,6 +111,7 @@ export function AuthProvider({ children }) {
       login,
       logout,
       register,
+      checkAuth,
     }}>
       {children}
     </AuthContext.Provider>

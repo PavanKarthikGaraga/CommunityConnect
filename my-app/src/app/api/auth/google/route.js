@@ -4,19 +4,28 @@ import { OAuth2Client } from 'google-auth-library';
 const client = new OAuth2Client({
   clientId: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  redirectUri: 'http://localhost:3000/api/auth/google/callback',
+  redirectUri: process.env.NEXT_PUBLIC_APP_URL + '/api/auth/google/callback',
 });
 
 export async function GET() {
-  const url = client.generateAuthUrl({
-    access_type: 'offline',
-    scope: [
-      'openid',
-      'email',
-      'profile',
-    ],
-    prompt: 'consent',
-  });
+  try {
+    console.log('Initializing Google OAuth...');
+    console.log('Redirect URI:', process.env.NEXT_PUBLIC_APP_URL + '/api/auth/google/callback');
+    
+    const url = client.generateAuthUrl({
+      access_type: 'offline',
+      scope: [
+        'openid',
+        'email',
+        'profile',
+      ],
+      prompt: 'consent',
+    });
 
-  return NextResponse.redirect(url);
+    console.log('Generated OAuth URL:', url);
+    return NextResponse.redirect(url);
+  } catch (error) {
+    console.error('Google OAuth initialization error:', error);
+    return NextResponse.redirect('/auth/login?error=OAuthInitFailed');
+  }
 } 

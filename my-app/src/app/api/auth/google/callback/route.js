@@ -3,46 +3,34 @@ import { OAuth2Client } from 'google-auth-library';
 import connectDB from '@/config/db';
 import { User } from '@/config/schema';
 import { createToken } from '@/config/jwt';
-import { cookies } from 'next/headers';
 import { sendWelcomeEmail } from '@/lib/email';
 
 const client = new OAuth2Client({
   clientId: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  redirectUri: 'http://localhost:3000/api/auth/google/callback',
+  redirectUri: process.env.NEXT_PUBLIC_APP_URL + '/api/auth/google/callback',
 });
 
 export async function GET(req) {
   try {
+    console.log('Starting Google OAuth callback...');
     const searchParams = new URL(req.url).searchParams;
     const code = searchParams.get('code');
 
-    // Add detailed logging
-    console.log('Full OAuth Config:', {
-      clientId: process.env.GOOGLE_CLIENT_ID?.slice(0, 8) + '...',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ? 'present' : 'missing',
-      redirectUri: 'http://localhost:3000/api/auth/google/callback',
-      code: code?.slice(0, 8) + '...'
-    });
-
-    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-      console.error('Missing OAuth credentials');
-      throw new Error('OAuth credentials not configured');
-    }
-
     if (!code) {
+      console.error('No code provided in callback');
       return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/auth/login?error=NoCodeProvided`);
     }
 
-    // Add debug logging
-    console.log('Google OAuth credentials:', {
-      clientId: process.env.GOOGLE_CLIENT_ID?.slice(0, 5) + '...',
-      redirectUri: 'http://localhost:3000/api/auth/google/callback',
-      code: code.slice(0, 5) + '...'
-    });
-
-    // Exchange code for tokens
+    console.log('Getting tokens from Google...');
     const { tokens } = await client.getToken(code);
+    
+    if (!tokens.id_token) {
+      console.error('No ID token received from Google');
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/auth/login?error=NoIdToken`);
+    }
+
+    console.log('Verifying ID token...');
     const ticket = await client.verifyIdToken({
       idToken: tokens.id_token,
       audience: process.env.GOOGLE_CLIENT_ID,
@@ -50,12 +38,14 @@ export async function GET(req) {
 
     const payload = ticket.getPayload();
     if (!payload) {
-      throw new Error('No user payload');
+      console.error('No payload in ID token');
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/auth/login?error=NoPayload`);
     }
 
+    console.log('Connecting to database...');
     await connectDB();
 
-    // Check if user exists
+    console.log('Checking for existing user...');
     let user = await User.findOne({ 
       $or: [
         { email: payload.email },
@@ -64,7 +54,7 @@ export async function GET(req) {
     });
 
     if (!user) {
-      // Create new user
+      console.log('Creating new user...');
       user = await User.create({
         name: payload.name,
         email: payload.email,
@@ -74,37 +64,48 @@ export async function GET(req) {
         status: 'Active'
       });
 
-      // Send welcome email
       try {
         await sendWelcomeEmail(user.name, user.email);
       } catch (emailError) {
-        console.error('Failed to send welcome email:', emailError);
+        console.error('Welcome email failed:', emailError);
       }
     } else if (!user.googleId) {
-      // If user exists but doesn't have googleId, add it
+      console.log('Updating existing user with Google ID...');
       user.googleId = payload.sub;
       await user.save();
     }
 
-    // Create JWT token
+    console.log('Creating JWT token...');
     const token = await createToken({
       id: user._id,
       email: user.email,
-      role: user.role
+      role: user.role,
+      name: user.name,
+      profileImage: user.profileImage
     });
 
-    // Set cookie
-    const cookieStore = cookies();
-    await cookieStore.set('token', token, {
+    // Create the response with absolute URL
+    const redirectUrl = new URL(`/dashboard/${user.role}`, process.env.NEXT_PUBLIC_APP_URL).toString();
+    const response = NextResponse.redirect(redirectUrl);
+
+    // Set cookie with proper configuration
+    response.cookies.set({
+      name: 'token',
+      value: token,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 // 7 days
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7 // 7 days
     });
 
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/dashboard`);
+    console.log('Redirecting to:', redirectUrl);
+    return response;
+
   } catch (error) {
     console.error('Google callback error:', error);
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/auth/login?error=AuthFailed`);
+    const errorUrl = new URL('/auth/login', process.env.NEXT_PUBLIC_APP_URL);
+    errorUrl.searchParams.set('error', 'AuthFailed');
+    return NextResponse.redirect(errorUrl.toString());
   }
 } 
