@@ -18,13 +18,16 @@ const UserSchema = new Schema({
   },
   password: {
     type: String,
-    required: true,
-    minlength: 8
+    required: function() {
+      // Only require password if googleId is not present
+      return !this.googleId;
+    }
   },
   role: {
     type: String,
-    enum: ['Volunteer', 'NGO', 'Government', 'Admin'],
-    default: 'Volunteer'
+    required: true,
+    default: 'Volunteer',
+    enum: ['Volunteer', 'Admin']
   },
   profileImage: {
     type: String,
@@ -102,6 +105,10 @@ const UserSchema = new Schema({
   },
   resetToken: String,
   resetTokenExpiry: Date,
+  googleId: {
+    type: String,
+    sparse: true
+  },
 }, {
   timestamps: true
 });
@@ -344,7 +351,6 @@ const CollaborationSchema = new Schema({
 });
 
 // Add indexes
-UserSchema.index({ email: 1 });
 ProjectSchema.index({ 
   title: 'text', 
   'description.short': 'text', 

@@ -71,6 +71,15 @@ export default function AuthPage() {
     });
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      window.location.href = '/api/auth/google';
+    } catch (error) {
+      console.error('Google sign-in error:', error);
+      toast.error('Failed to initiate Google sign-in');
+    }
+  };
+
   return (
     <div className="auth-container">
       <Toaster position="top-right" />
@@ -217,7 +226,12 @@ export default function AuthPage() {
                 <span>or continue with</span>
               </div>
 
-              <button type="button" className="btn btn-google">
+              <button 
+                type="button"
+                onClick={handleGoogleSignIn}
+                className="btn btn-outline google-btn"
+                disabled={loading}
+              >
                 <FcGoogle className="google-icon" />
                 Continue with Google
               </button>
