@@ -1,21 +1,59 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import '../auth-shared.css';
 import './page.css';
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: ''
   });
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    if (!token) {
+      router.push('/auth/forgot-password');
+    }
+  }, [token, router]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.password === formData.confirmPassword) {
-      // Add your password reset logic here
-      setIsSubmitted(true);
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    setLoading(true);
+    const loadingToast = toast.loading('Resetting password...');
+
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token,
+          password: formData.password
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success('Password reset successful!', { id: loadingToast });
+        router.push('/auth/login');
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      toast.error(error.message || 'Failed to reset password', { id: loadingToast });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -66,7 +104,7 @@ export default function ResetPasswordPage() {
           transition={{ duration: 0.6 }}
         >
           <div className="auth-card">
-            {!isSubmitted ? (
+            {!loading ? (
               <>
                 <div className="auth-header">
                   <h2>Reset Password</h2>
@@ -124,18 +162,29 @@ export default function ResetPasswordPage() {
                 </form>
               </>
             ) : (
-              <div className="success-message">
-                <div className="success-icon">✓</div>
-                <h2>Password Reset Successful!</h2>
-                <p>Your password has been successfully updated.</p>
-                <a href="/auth/login" className="btn btn-primary auth-submit">
-                  Continue to Login
-                </a>
+              <div className="loading-message">
+                <div className="loading-icon">⏳</div>
+                <h2>Resetting Password...</h2>
+                <p>Please wait while we process your request.</p>
               </div>
             )}
           </div>
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="auth-container">
+        <div className="auth-content">
+          <div className="loading-spinner">Loading...</div>
+        </div>
+      </div>
+    }>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }

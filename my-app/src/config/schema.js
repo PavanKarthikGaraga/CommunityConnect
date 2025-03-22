@@ -99,7 +99,9 @@ const UserSchema = new Schema({
   lastActive: {
     type: Date,
     default: Date.now
-  }
+  },
+  resetToken: String,
+  resetTokenExpiry: Date,
 }, {
   timestamps: true
 });

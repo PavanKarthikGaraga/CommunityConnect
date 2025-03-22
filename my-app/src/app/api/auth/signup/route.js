@@ -48,8 +48,8 @@ export async function POST(req) {
       role: user.role
     });
 
-    // Set cookie
-    cookies().set('token', token, {
+    // Set cookie - Make this async
+    await cookies().set('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',

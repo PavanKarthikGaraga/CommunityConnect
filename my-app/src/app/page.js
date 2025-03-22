@@ -1,7 +1,5 @@
 'use client';
-import project1 from './assets/projects.avif';
-import NGO from './assets/ngo.jpg';
-import Blog from './assets/blog.webp';
+
 import Image from 'next/image';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';

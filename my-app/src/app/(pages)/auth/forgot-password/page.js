@@ -2,17 +2,40 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import '../auth-shared.css';
 import './page.css';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add your password reset logic here
-    setIsSubmitted(true);
+    setLoading(true);
+    const loadingToast = toast.loading('Sending reset instructions...');
+
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success('Reset instructions sent!', { id: loadingToast });
+        setIsSubmitted(true);
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      toast.error(error.message || 'Failed to send reset instructions', { id: loadingToast });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -76,8 +99,8 @@ export default function ForgotPasswordPage() {
                     />
                   </div>
 
-                  <button type="submit" className="btn btn-primary auth-submit">
-                    Send Reset Instructions
+                  <button type="submit" className="btn btn-primary auth-submit" disabled={loading}>
+                    {loading ? 'Sending...' : 'Send Reset Instructions'}
                   </button>
 
                   <Link href="/auth/login" className="auth-back-link">
