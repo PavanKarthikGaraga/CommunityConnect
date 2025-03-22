@@ -1,13 +1,19 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FcGoogle } from 'react-icons/fc';
 import { motion } from 'framer-motion';
+import toast, { Toaster } from 'react-hot-toast';
 import '../auth-shared.css';
 import './page.css';
+import { useAuth } from '@/AuthContext/AuthContext';
 
 export default function AuthPage() {
+  const router = useRouter();
+  const { login, register } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -15,9 +21,47 @@ export default function AuthPage() {
     confirmPassword: ''
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        const loadingToast = toast.loading('Signing in...');
+        const result = await login(formData.email, formData.password);
+        
+        if (result.success) {
+          toast.success('Successfully signed in!', { id: loadingToast });
+          router.push('/dashboard');
+        } else {
+          toast.error(result.error || 'Sign in failed', { id: loadingToast });
+        }
+      } else {
+        if (formData.password !== formData.confirmPassword) {
+          toast.error('Passwords do not match');
+          return;
+        }
+
+        const loadingToast = toast.loading('Creating account...');
+        const result = await register({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: 'Volunteer'
+        });
+
+        if (result.success) {
+          toast.success('Account created successfully!', { id: loadingToast });
+          router.push('/dashboard');
+        } else {
+          toast.error(result.error || 'Registration failed', { id: loadingToast });
+        }
+      }
+    } catch (err) {
+      toast.error(err.message || 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -29,6 +73,7 @@ export default function AuthPage() {
 
   return (
     <div className="auth-container">
+      <Toaster position="top-right" />
       <div className="auth-content">
         {/* Left Side - Hero Section */}
         <motion.div 
@@ -100,6 +145,7 @@ export default function AuthPage() {
                     value={formData.name}
                     onChange={handleChange}
                     required={!isLogin}
+                    disabled={loading}
                     placeholder="Enter your full name"
                   />
                 </motion.div>
@@ -155,8 +201,16 @@ export default function AuthPage() {
                 </motion.div>
               )}
 
-              <button type="submit" className="btn btn-primary auth-submit">
-                {isLogin ? 'Sign In' : 'Create Account'}
+              <button 
+                type="submit" 
+                className="btn btn-primary auth-submit"
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="loading-spinner"></span>
+                ) : (
+                  isLogin ? 'Sign In' : 'Create Account'
+                )}
               </button>
 
               <div className="auth-divider">

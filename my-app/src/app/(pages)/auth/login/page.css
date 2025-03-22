@@ -387,3 +387,25 @@
   .forgot-password-link:hover {
     text-decoration: underline;
   }
+  
+  /* Add to your existing CSS */
+  .loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 0.8s linear infinite;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .auth-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
