@@ -274,6 +274,17 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <section className="blog-preview-section">
+        <div className="section-content">
+          <h2>Latest Impact Stories</h2>
+          <p>Discover how volunteers are making a difference in communities worldwide</p>
+          <Link href="/blogs" className="cta-button">
+            Read Our Stories →
+          </Link>
+        </div>
+      </section>
+
       <Footer />
     </main>
   );
