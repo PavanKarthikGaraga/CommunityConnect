@@ -9,9 +9,6 @@ const client = new OAuth2Client({
 
 export async function GET() {
   try {
-    console.log('Initializing Google OAuth...');
-    console.log('Redirect URI:', process.env.NEXT_PUBLIC_APP_URL + '/api/auth/google/callback');
-    
     const url = client.generateAuthUrl({
       access_type: 'offline',
       scope: [
@@ -22,10 +19,8 @@ export async function GET() {
       prompt: 'consent',
     });
 
-    console.log('Generated OAuth URL:', url);
     return NextResponse.redirect(url);
   } catch (error) {
-    console.error('Google OAuth initialization error:', error);
     return NextResponse.redirect('/auth/login?error=OAuthInitFailed');
   }
 } 

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { FcGoogle } from 'react-icons/fc';
@@ -9,20 +9,10 @@ import '../auth-shared.css';
 import './page.css';
 import { useAuth } from '@/AuthContext/AuthContext';
 
-export default function AuthPage() {
-  const router = useRouter();
+// Separate component for the error handling
+function ErrorHandler() {
   const searchParams = useSearchParams();
-  const { login, register } = useAuth();
-  const [isLogin, setIsLogin] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
-
-  // Check for error parameter
+  
   useEffect(() => {
     const error = searchParams.get('error');
     if (error) {
@@ -33,6 +23,21 @@ export default function AuthPage() {
       }
     }
   }, [searchParams]);
+
+  return null;
+}
+
+export default function AuthPage() {
+  const router = useRouter();
+  const { login, register } = useAuth();
+  const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,7 +50,6 @@ export default function AuthPage() {
         
         if (result.success) {
           toast.success('Successfully signed in!', { id: loadingToast });
-          router.push('/dashboard');
         } else {
           toast.error(result.error || 'Sign in failed', { id: loadingToast });
         }
@@ -65,7 +69,6 @@ export default function AuthPage() {
 
         if (result.success) {
           toast.success('Account created successfully!', { id: loadingToast });
-          router.push('/dashboard');
         } else {
           toast.error(result.error || 'Registration failed', { id: loadingToast });
         }
@@ -94,175 +97,180 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="auth-container">
-      <Toaster position="top-right" />
-      <div className="auth-content">
-        {/* Left Side - Hero Section */}
-        <motion.div 
-          className="auth-hero"
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="hero-content">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <span className="hero-badge">
-                <span className="pulse-dot"></span>
-                5000+ Volunteers Making Impact
-              </span>
-            </motion.div>
+    <>
+      <Suspense fallback={null}>
+        <ErrorHandler />
+      </Suspense>
+      <div className="auth-container">
+        <Toaster position="top-center" />
+        <div className="auth-content">
+          {/* Left Side - Hero Section */}
+          <motion.div 
+            className="auth-hero"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="hero-content">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <span className="hero-badge">
+                  <span className="pulse-dot"></span>
+                  5000+ Volunteers Making Impact
+                </span>
+              </motion.div>
 
-            <motion.h1
-              className="hero-title"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              Make Change.<br/>
-              Create Impact.<br/>
-              <span className="gradient-text">Build Community.</span>
-            </motion.h1>
+              <motion.h1
+                className="hero-title"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                Make Change.<br/>
+                Create Impact.<br/>
+                <span className="gradient-text">Build Community.</span>
+              </motion.h1>
 
-            <motion.p
-              className="hero-description"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              Join a network of changemakers transforming communities through 
-              meaningful collaboration and innovative social initiatives.
-            </motion.p>
-          </div>
-        </motion.div>
-
-        {/* Right Side - Auth Form */}
-        <motion.div 
-          className="auth-form-container"
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="auth-card">
-            <div className="auth-header">
-              <h2>{isLogin ? 'Welcome Back!' : 'Create Account'}</h2>
-              <p>{isLogin ? 'Continue your journey of impact' : 'Start making a difference today'}</p>
+              <motion.p
+                className="hero-description"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                Join a network of changemakers transforming communities through 
+                meaningful collaboration and innovative social initiatives.
+              </motion.p>
             </div>
+          </motion.div>
 
-            <form onSubmit={handleSubmit} className="auth-form">
-              {!isLogin && (
-                <motion.div 
-                  className="form-group"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <label htmlFor="name">Full Name</label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required={!isLogin}
-                    disabled={loading}
-                    placeholder="Enter your full name"
-                  />
-                </motion.div>
-              )}
-
-              <div className="form-group">
-                <label htmlFor="email">Email Address</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  placeholder="Enter your email"
-                />
+          {/* Right Side - Auth Form */}
+          <motion.div 
+            className="auth-form-container"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="auth-card">
+              <div className="auth-header">
+                <h2>{isLogin ? 'Welcome Back!' : 'Create Account'}</h2>
+                <p>{isLogin ? 'Continue your journey of impact' : 'Start making a difference today'}</p>
               </div>
 
-              <div className="form-group">
-                <label htmlFor="password">Password</label>
-                <div className="password-input">
+              <form onSubmit={handleSubmit} className="auth-form">
+                {!isLogin && (
+                  <motion.div 
+                    className="form-group"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    <label htmlFor="name">Full Name</label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required={!isLogin}
+                      disabled={loading}
+                      placeholder="Enter your full name"
+                    />
+                  </motion.div>
+                )}
+
+                <div className="form-group">
+                  <label htmlFor="email">Email Address</label>
                   <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={formData.password}
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
                     onChange={handleChange}
                     required
-                    placeholder="Enter your password"
+                    placeholder="Enter your email"
                   />
-                  <Link href="/auth/forgot-password" className="forgot-password-link">
-                    Forgot password?
-                  </Link>
                 </div>
-              </div>
 
-              {!isLogin && (
-                <motion.div 
-                  className="form-group"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <label htmlFor="confirmPassword">Confirm Password</label>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    required={!isLogin}
-                    placeholder="Confirm your password"
-                  />
-                </motion.div>
-              )}
+                <div className="form-group">
+                  <label htmlFor="password">Password</label>
+                  <div className="password-input">
+                    <input
+                      type="password"
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      placeholder="Enter your password"
+                    />
+                    <Link href="/auth/forgot-password" className="forgot-password-link">
+                      Forgot password?
+                    </Link>
+                  </div>
+                </div>
 
-              <button 
-                type="submit" 
-                className="btn btn-primary auth-submit"
-                disabled={loading}
-              >
-                {loading ? (
-                  <span className="loading-spinner"></span>
-                ) : (
-                  isLogin ? 'Sign In' : 'Create Account'
+                {!isLogin && (
+                  <motion.div 
+                    className="form-group"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    <label htmlFor="confirmPassword">Confirm Password</label>
+                    <input
+                      type="password"
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      required={!isLogin}
+                      placeholder="Confirm your password"
+                    />
+                  </motion.div>
                 )}
-              </button>
 
-              <div className="auth-divider">
-                <span>or continue with</span>
-              </div>
-
-              <button 
-                type="button"
-                onClick={handleGoogleSignIn}
-                className="btn btn-outline google-btn"
-                disabled={loading}
-              >
-                <FcGoogle className="google-icon" />
-                Continue with Google
-              </button>
-
-              <p className="auth-switch">
-                {isLogin ? "Don't have an account? " : "Already have an account? "}
-                <button
-                  type="button"
-                  className="switch-btn"
-                  onClick={() => setIsLogin(!isLogin)}
+                <button 
+                  type="submit" 
+                  className="btn btn-primary auth-submit"
+                  disabled={loading}
                 >
-                  {isLogin ? 'Sign Up' : 'Sign In'}
+                  {loading ? (
+                    <span className="loading-spinner"></span>
+                  ) : (
+                    isLogin ? 'Sign In' : 'Create Account'
+                  )}
                 </button>
-              </p>
-            </form>
-          </div>
-        </motion.div>
+
+                <div className="auth-divider">
+                  <span>or continue with</span>
+                </div>
+
+                <button 
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  className="btn btn-outline google-btn"
+                  disabled={loading}
+                >
+                  <FcGoogle className="google-icon" />
+                  Continue with Google
+                </button>
+
+                <p className="auth-switch">
+                  {isLogin ? "Don't have an account? " : "Already have an account? "}
+                  <button
+                    type="button"
+                    className="switch-btn"
+                    onClick={() => setIsLogin(!isLogin)}
+                  >
+                    {isLogin ? 'Sign Up' : 'Sign In'}
+                  </button>
+                </p>
+              </form>
+            </div>
+          </motion.div>
+        </div>
       </div>
-    </div>
+    </>
   );
 } 

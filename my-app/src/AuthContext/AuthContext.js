@@ -11,26 +11,20 @@ export function AuthProvider({ children }) {
 
   const checkAuth = async () => {
     try {
-      console.log('Checking authentication status...');
       const response = await fetch('/api/auth/check', {
         credentials: 'include',
       });
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Auth check response:', data);
-        
         if (data.authenticated && data.user) {
           setUser(data.user);
-          console.log('User authenticated:', data.user);
           return true;
         }
       }
-      
       setUser(null);
       return false;
     } catch (error) {
-      console.error('Auth check error:', error);
       setUser(null);
       return false;
     } finally {

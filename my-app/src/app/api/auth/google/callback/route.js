@@ -13,24 +13,14 @@ const client = new OAuth2Client({
 
 export async function GET(req) {
   try {
-    console.log('Starting Google OAuth callback...');
     const searchParams = new URL(req.url).searchParams;
     const code = searchParams.get('code');
 
     if (!code) {
-      console.error('No code provided in callback');
       return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/auth/login?error=NoCodeProvided`);
     }
 
-    console.log('Getting tokens from Google...');
     const { tokens } = await client.getToken(code);
-    
-    if (!tokens.id_token) {
-      console.error('No ID token received from Google');
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/auth/login?error=NoIdToken`);
-    }
-
-    console.log('Verifying ID token...');
     const ticket = await client.verifyIdToken({
       idToken: tokens.id_token,
       audience: process.env.GOOGLE_CLIENT_ID,
@@ -38,14 +28,11 @@ export async function GET(req) {
 
     const payload = ticket.getPayload();
     if (!payload) {
-      console.error('No payload in ID token');
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/auth/login?error=NoPayload`);
+      throw new Error('No user payload');
     }
 
-    console.log('Connecting to database...');
     await connectDB();
 
-    console.log('Checking for existing user...');
     let user = await User.findOne({ 
       $or: [
         { email: payload.email },
@@ -54,7 +41,6 @@ export async function GET(req) {
     });
 
     if (!user) {
-      console.log('Creating new user...');
       user = await User.create({
         name: payload.name,
         email: payload.email,
@@ -67,15 +53,13 @@ export async function GET(req) {
       try {
         await sendWelcomeEmail(user.name, user.email);
       } catch (emailError) {
-        console.error('Welcome email failed:', emailError);
+        // Silently handle email errors
       }
     } else if (!user.googleId) {
-      console.log('Updating existing user with Google ID...');
       user.googleId = payload.sub;
       await user.save();
     }
 
-    console.log('Creating JWT token...');
     const token = await createToken({
       id: user._id,
       email: user.email,
@@ -84,11 +68,9 @@ export async function GET(req) {
       profileImage: user.profileImage
     });
 
-    // Create the response with absolute URL
     const redirectUrl = new URL(`/dashboard/${user.role}`, process.env.NEXT_PUBLIC_APP_URL).toString();
     const response = NextResponse.redirect(redirectUrl);
 
-    // Set cookie with proper configuration
     response.cookies.set({
       name: 'token',
       value: token,
@@ -96,14 +78,12 @@ export async function GET(req) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 60 * 60 * 24 * 7 // 7 days
+      maxAge: 60 * 60 * 24 * 7
     });
 
-    console.log('Redirecting to:', redirectUrl);
     return response;
 
   } catch (error) {
-    console.error('Google callback error:', error);
     const errorUrl = new URL('/auth/login', process.env.NEXT_PUBLIC_APP_URL);
     errorUrl.searchParams.set('error', 'AuthFailed');
     return NextResponse.redirect(errorUrl.toString());
