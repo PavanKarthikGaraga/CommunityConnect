@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { FcGoogle } from 'react-icons/fc';
 import { motion } from 'framer-motion';
+import '../auth-shared.css';
 import './page.css';
 
 export default function AuthPage() {
@@ -129,6 +130,9 @@ export default function AuthPage() {
                     required
                     placeholder="Enter your password"
                   />
+                  <Link href="/auth/forgot-password" className="forgot-password-link">
+                    Forgot password?
+                  </Link>
                 </div>
               </div>
 

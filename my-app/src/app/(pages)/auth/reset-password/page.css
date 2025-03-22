@@ -1,0 +1,72 @@
+/* Import existing auth styles and add these new styles */
+
+.password-requirements {
+  background: var(--gray-100);
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  margin: 1.5rem 0;
+}
+
+.password-requirements h4 {
+  color: var(--text);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.password-requirements ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.password-requirements li {
+  color: var(--gray-800);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.password-requirements li::before {
+  content: '○';
+  color: var(--gray-800);
+}
+
+.password-requirements li.valid::before {
+  content: '●';
+  color: var(--primary);
+}
+
+.password-requirements li.valid {
+  color: var(--primary);
+}
+
+.success-message {
+  text-align: center;
+  padding: 2rem;
+}
+
+.success-icon {
+  width: 64px;
+  height: 64px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin: 0 auto 1.5rem;
+}
+
+.success-message h2 {
+  color: var(--text);
+  margin-bottom: 1rem;
+}
+
+.success-message p {
+  color: var(--gray-800);
+  margin-bottom: 1.5rem;
+} 
