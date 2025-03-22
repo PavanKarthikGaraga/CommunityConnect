@@ -30,6 +30,6 @@ export async function POST(request) {
     return Response.json({ error: "Internal Server Error" }, { status: 500 });
 
   } finally {
-    await disconnect(); // Disconnect after processing request
+    await disconnect(); 
   }
 }

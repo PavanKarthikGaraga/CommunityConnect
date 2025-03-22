@@ -1,53 +1,56 @@
-import { connect,disconnect } from '../../../../lib/db';
-import bcrypt from 'bcryptjs';
-import { generateAuthTokens } from '../../../../lib/jwt';
-import { cookies } from 'next/headers';
+import { connect, disconnect } from "../../../../lib/db";
+import bcrypt from "bcryptjs";
+import { generateAuthTokens } from "../../../../lib/jwt";
+import { cookies } from "next/headers";
+import mongoose from "mongoose";
 
 export async function POST(request) {
     try {
         const { Username, Password } = await request.json();
 
-        const db = await connect();
-        const collection = db.collection('users');
+        await connect();
+        const db = mongoose.connection.db; // Correctly access the raw MongoDB connection
+        const collection = db.collection("users");
 
         const existingUser = await collection.findOne({ Username });
 
         if (!existingUser) {
-            return Response.json({
-                error: 'Username does not exist'
-            }, { status: 400 });
+            return Response.json({ error: "Username does not exist" }, { status: 400 });
         }
         
-        const hashPassword = await bcrypt.compare(Password, existingUser.Password);
+        const isPasswordValid = await bcrypt.compare(Password, existingUser.Password);
+        console.log("isPasswordValid",isPasswordValid);
+        if (!isPasswordValid) {
+            return Response.json({ error: "Invalid Password" }, { status: 400 });
+        }
 
-        if (!hashPassword) {
-            return Response.json({
-                error: 'Invalid Password'
-            }, { status: 400 });
-        }
-        
-        const { accessToken, refreshToken } = generateAuthTokens({ 
+        console.log("Username",Username,"Password",Password,"role", existingUser.role,"existingUser",existingUser);
+
+        const { accessToken, refreshToken } = await generateAuthTokens({ 
             username: Username,
-            role: existingUser.role || 'user'  // Default to 'user' if role not set
+            role: existingUser.role || "user"
         });
         
-        // Get cookies instance
-        const cookieStore = await cookies();
+        console.log("accessToken",accessToken);
+        console.log("refreshToken",refreshToken);
+        
+        // Get cookies instance (no need for `await`)
+        const cookieStore =await cookies();
         
         // Set access token cookie
-        await cookieStore.set('accessToken', accessToken, {
+        await cookieStore.set("accessToken", accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 15  // 15 seconds
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 15 // 15 seconds
         });
 
         // Set refresh token cookie
-        await cookieStore.set('refreshToken', refreshToken, {
+        await cookieStore.set("refreshToken", refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 45  // 45 seconds
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 45 // 45 seconds
         });
 
         return Response.json({
@@ -55,14 +58,13 @@ export async function POST(request) {
             user: {
                 username: Username,
                 id: existingUser._id.toString(),
-                role: existingUser.role || 'user'  // Include role in response
+                role: existingUser.role || "user"
             }
         }, { status: 200 });
         
     } catch (err) {
-        return Response.json({
-            error: err.message
-        }, { status: 500 });
+        console.error(err);
+        return Response.json({ error: err.message }, { status: 500 });
     } finally {
         await disconnect();
     }
