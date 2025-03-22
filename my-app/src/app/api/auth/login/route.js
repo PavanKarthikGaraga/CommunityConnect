@@ -40,8 +40,11 @@ export async function POST(req) {
       role: user.role
     });
 
+    // Get cookies instance once
+    const cookieStore = cookies();
+    
     // Set cookie
-    await cookies().set('token', token, {
+    await cookieStore.set('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',

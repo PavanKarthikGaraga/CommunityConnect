@@ -4,6 +4,7 @@ import connectDB from '@/config/db';
 import { User } from '@/config/schema';
 import { createToken } from '@/config/jwt';
 import { cookies } from 'next/headers';
+import { sendWelcomeEmail } from '@/lib/email';
 
 export async function POST(req) {
   try {
@@ -42,19 +43,30 @@ export async function POST(req) {
     });
 
     // Create token
-    const token = createToken({
+    const token = await createToken({
       id: user._id,
       email: user.email,
       role: user.role
     });
 
-    // Set cookie - Make this async
-    await cookies().set('token', token, {
+    // Get cookies instance once
+    const cookieStore = cookies();
+    
+    // Set cookie
+    await cookieStore.set('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 // 7 days
     });
+
+    // Send welcome email
+    try {
+      await sendWelcomeEmail(name, email);
+    } catch (emailError) {
+      console.error('Failed to send welcome email:', emailError);
+      // Don't return error - continue with signup process
+    }
 
     return NextResponse.json({
       user: {
