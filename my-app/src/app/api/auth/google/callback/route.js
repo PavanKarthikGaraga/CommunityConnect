@@ -8,7 +8,7 @@ import { sendWelcomeEmail } from '@/lib/email';
 const client = new OAuth2Client({
   clientId: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  redirectUri: process.env.NEXT_PUBLIC_APP_URL + '/api/auth/google/callback',
+  redirectUri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/google/callback`,
 });
 
 export async function GET(req) {
@@ -68,7 +68,7 @@ export async function GET(req) {
       profileImage: user.profileImage
     });
 
-    const redirectUrl = new URL(`/dashboard/${user.role}`, process.env.NEXT_PUBLIC_APP_URL).toString();
+    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/${user.role}`;
     const response = NextResponse.redirect(redirectUrl);
 
     response.cookies.set({
@@ -84,8 +84,7 @@ export async function GET(req) {
     return response;
 
   } catch (error) {
-    const errorUrl = new URL('/auth/login', process.env.NEXT_PUBLIC_APP_URL);
-    errorUrl.searchParams.set('error', 'AuthFailed');
-    return NextResponse.redirect(errorUrl.toString());
+    console.error('Google callback error:', error);
+    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/auth/login?error=AuthFailed`);
   }
 } 

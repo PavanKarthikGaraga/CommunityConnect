@@ -4,7 +4,7 @@ import { OAuth2Client } from 'google-auth-library';
 const client = new OAuth2Client({
   clientId: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  redirectUri: process.env.NEXT_PUBLIC_APP_URL + '/api/auth/google/callback',
+  redirectUri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/google/callback`,
 });
 
 export async function GET() {
@@ -21,6 +21,6 @@ export async function GET() {
 
     return NextResponse.redirect(url);
   } catch (error) {
-    return NextResponse.redirect('/auth/login?error=OAuthInitFailed');
+    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/auth/login?error=OAuthInitFailed`);
   }
 } 

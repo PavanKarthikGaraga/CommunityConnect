@@ -87,13 +87,8 @@ export default function AuthPage() {
     });
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      window.location.href = '/api/auth/google';
-    } catch (error) {
-      console.error('Google sign-in error:', error);
-      toast.error('Failed to initiate Google sign-in');
-    }
+  const handleGoogleSignIn = () => {
+    window.location.href = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/google`;
   };
 
   return (
