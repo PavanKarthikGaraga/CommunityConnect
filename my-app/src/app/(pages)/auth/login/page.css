@@ -438,3 +438,9 @@
   .google-icon {
     font-size: 1.25rem;
   }
+  .auth-switch-links{
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+  }

@@ -258,11 +258,9 @@ export default function AuthPage() {
                     {isLogin ? 'Sign Up' : 'Sign In'}
                   </button>
                 </p>
-                <p className="auth-switch">
+                <p className="auth-switch-links">
                   <Link href="/auth/forgot-password">Forgot Password?</Link>
-                </p>
-                <p className="auth-switch">
-                  <Link href="/auth/ngo-login">NGO Login</Link>
+                  <Link href="/auth/ngo-login">Orgonisation Login</Link>
                 </p>
               </form>
             </div>
