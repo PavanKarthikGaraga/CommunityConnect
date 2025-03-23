@@ -262,7 +262,7 @@ export default function AuthPage() {
                   <Link href="/auth/forgot-password">Forgot Password?</Link>
                 </p>
                 <p className="auth-switch">
-                  <Link href="/auth/ngo-login">NGO Login</Link>
+                  <Link href="/auth/ngo-login">Other Login</Link>
                 </p>
               </form>
             </div>

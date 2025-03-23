@@ -1,8 +1,10 @@
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
+    remotePatterns: [
+      // your remote patterns if any
+    ],
   },
 };
 
-export default nextConfig;
+export default nextConfig; 
