@@ -1,55 +1,34 @@
-import { verifyAccessToken } from "../../../../config/jwt";
-import { cookies } from "next/headers";
+import { NextResponse } from 'next/server';
+import { verifyToken } from '@/config/jwt';
+import { cookies } from 'next/headers';
 
-export async function GET() {
-    try {
-        const cookieStore = cookies();
-        const accessToken = cookieStore.get('accessToken');
+export async function GET(req) {
+  try {
+    const cookieStore = cookies();
+    const token = cookieStore.get('token');
+    const tokenValue = token?.value;
 
-        if (!accessToken) {
-            return Response.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        try {
-            const decoded = verifyAccessToken(accessToken.value);
-            if (!decoded) {
-                cookies().delete('accessToken');
-                cookies().delete('refreshToken');
-                return Response.json({ error: 'Invalid token' }, { status: 401 });
-            }
-
-            return Response.json({
-                user: {
-                    username: decoded.username
-                }
-            }, { status: 200 });
-
-        } catch (tokenError) {
-            // Handle specific token verification errors
-            if (tokenError.name === 'TokenExpiredError') {
-                cookies().delete('accessToken');
-                return Response.json({ 
-                    error: 'Token expired',
-                    code: 'TOKEN_EXPIRED'
-                }, { status: 401 });
-            }
-            
-            if (tokenError.name === 'JsonWebTokenError') {
-                cookies().delete('accessToken');
-                cookies().delete('refreshToken');
-                return Response.json({ 
-                    error: 'Invalid token',
-                    code: 'INVALID_TOKEN'
-                }, { status: 401 });
-            }
-
-            throw tokenError;
-        }
-    } catch (error) {
-        console.log('Auth check error:', error);
-        return Response.json({ 
-            error: 'Internal Server Error',
-            details: error.message 
-        }, { status: 500 });
+    if (!tokenValue) {
+      return NextResponse.json({ authenticated: false }, { status: 401 });
     }
-}
+
+    const decoded = await verifyToken(tokenValue);
+    if (!decoded) {
+      return NextResponse.json({ authenticated: false }, { status: 401 });
+    }
+
+    return NextResponse.json({
+      authenticated: true,
+      user: {
+        id: decoded.id,
+        email: decoded.email,
+        role: decoded.role,
+        name: decoded.name,
+        profileImage: decoded.profileImage
+      }
+    });
+  } catch (error) {
+    console.error('Auth check error:', error);
+    return NextResponse.json({ authenticated: false }, { status: 401 });
+  }
+} 

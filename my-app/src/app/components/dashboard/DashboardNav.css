@@ -1,0 +1,95 @@
+.dashboard-nav {
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 1rem 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+}
+
+.dashboard-nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboard-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dashboard-logo {
+  font-size: 1.4rem;
+  font-weight: 800;
+  background: linear-gradient(45deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-decoration: none;
+}
+
+.role-badge {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 0.25rem 0.75rem;
+  border-radius: 100px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.dashboard-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem;
+  border-radius: 100px;
+  background: var(--gray-100);
+}
+
+.user-name {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.profile-image {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-800);
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  background: var(--gray-100);
+  color: var(--text);
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  background: var(--gray-200);
+} 

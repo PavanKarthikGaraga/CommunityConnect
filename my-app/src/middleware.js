@@ -1,46 +1,64 @@
-import { NextResponse } from "next/server";
-import { verifyAccessToken } from "./lib/jwt";
+import { NextResponse } from 'next/server';
+import { verifyToken } from '@/config/jwt';
 
-export function middleware(req) {
-  const token = req.cookies.get("accessToken")?.value;
-  const pathname = req.nextUrl.pathname;
-
-  // If the user is already logged in, prevent access to login/forgot-password
-  if (token && (pathname === "/auth/login" || pathname === "/auth/forgot-password")) {
-    try {
-      const decoded = verifyAccessToken(token, true);
-      const userRole = decoded.role;
-      return NextResponse.redirect(new URL(`/dashboard/${userRole}`, req.url));
-    } catch (err) {
-      // If token is invalid, redirect to login
-      return NextResponse.redirect(new URL("/auth/login", req.url));
-    }
-  }
-
-  // If the user is not logged in, prevent access to dashboard pages
-  if (!token && pathname.startsWith("/dashboard")) {
-    return NextResponse.redirect(new URL("/auth/login", req.url));
-  }
-
-  // If the user is logged in but accessing the wrong dashboard, redirect them
-  if (token && pathname.startsWith("/dashboard")) {
-    try {
-      const decoded = verifyAccessToken(token, true);
-      const userRole = decoded.role;
-      const expectedPath = `/dashboard/${userRole}`;
-
-      if (!pathname.startsWith(expectedPath)) {
-        return NextResponse.redirect(new URL(expectedPath, req.url));
-      }
-    } catch (err) {
-      return NextResponse.redirect(new URL("/auth/login", req.url));
-    }
-  }
-
-  // Allow access if no redirection is required
-  return NextResponse.next();
-}
-
+// Define the config for matcher
 export const config = {
-  matcher: ["/dashboard/:path*", "/auth/login", "/auth/forgot-password"],
+  matcher: [
+    '/dashboard/:path*',
+    '/projects/create',
+    '/profile'
+  ]
 };
+
+export async function middleware(request) {
+  const token = request.cookies.get('token')?.value;
+  const path = request.nextUrl.pathname;
+
+  // If no token exists, redirect to login
+  if (!token) {
+    return NextResponse.redirect(new URL('/auth/login', request.url));
+  }
+
+  try {
+    // Verify and decode the token
+    const decoded = await verifyToken(token);
+    
+    if (!decoded) {
+      return NextResponse.redirect(new URL('/auth/login', request.url));
+    }
+
+    // Get user role from decoded token
+    const userRole = decoded.role;
+
+    // Handle dashboard routes
+    if (path.startsWith('/dashboard')) {
+      // Extract the role from the URL (e.g., /dashboard/Volunteer -> Volunteer)
+      const requestedRole = path.split('/')[2];
+
+      // If trying to access root dashboard, redirect to role-specific dashboard
+      if (path === '/dashboard') {
+        return NextResponse.redirect(new URL(`/dashboard/${userRole}`, request.url));
+      }
+
+      // If trying to access a role-specific dashboard that doesn't match their role
+      if (requestedRole && requestedRole !== userRole) {
+        return NextResponse.redirect(new URL(`/dashboard/${userRole}`, request.url));
+      }
+    }
+
+    // Add role to request headers for potential use in the application
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-user-role', userRole);
+
+    // Return the request with modified headers
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+
+  } catch (error) {
+    // If token verification fails, redirect to login
+    return NextResponse.redirect(new URL('/auth/login', request.url));
+  }
+}

@@ -1,0 +1,122 @@
+.verification-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.verification-card {
+  background: white;
+  padding: 3rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+}
+
+.verification-icon {
+  color: #4299e1;
+  margin-bottom: 1.5rem;
+}
+
+.verification-card h1 {
+  color: #2d3748;
+  margin-bottom: 1rem;
+}
+
+.verification-card p {
+  color: #718096;
+  margin-bottom: 2rem;
+}
+
+.verification-info {
+  background: #f7fafc;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.verification-info ul {
+  list-style: none;
+  padding: 0;
+  text-align: left;
+}
+
+.verification-info li {
+  color: #4a5568;
+  padding: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.verification-info li::before {
+  content: "•";
+  color: #4299e1;
+}
+
+.back-to-login {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #4299e1;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.back-to-login:hover {
+  color: #3182ce;
+}
+
+.verification-actions {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.resend-info {
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+.resend-button {
+  background: none;
+  border: none;
+  color: #4299e1;
+  font-size: 0.9rem;
+  padding: 0.5rem;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.resend-button:hover {
+  color: #3182ce;
+  text-decoration: underline;
+}
+
+.verification-info h3 {
+  color: #2d3748;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.verification-info ul li {
+  padding: 0.5rem 0;
+  color: #4a5568;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.verification-info ul li::before {
+  content: "✓";
+  color: #48bb78;
+  font-weight: bold;
+} 
