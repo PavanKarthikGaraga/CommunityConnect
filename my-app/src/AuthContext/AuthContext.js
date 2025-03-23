@@ -36,13 +36,6 @@ export function AuthProvider({ children }) {
     checkAuth();
   }, []);
 
-  useEffect(() => {
-    if (!loading && user) {
-      console.log('Redirecting to dashboard:', user.role);
-      router.push(`/dashboard/${user.role}`);
-    }
-  }, [user, loading, router]);
-
   const logout = async () => {
     try {
       await fetch('/api/auth/logout', {
