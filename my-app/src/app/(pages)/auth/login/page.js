@@ -1,9 +1,9 @@
 'use client';
-import { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { FcGoogle } from 'react-icons/fc';
 import { motion } from 'framer-motion';
+import { AuthContext } from '@/AuthContext/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import '../auth-shared.css';
 import './page.css';
@@ -17,10 +17,17 @@ function ErrorHandler() {
     const error = searchParams.get('error');
     if (error) {
       if (error === 'AuthFailed') {
-        toast.error('Authentication failed. Please try again.');
+        toast.error('Authentication failed. Please check your credentials and try again.');
+      } else if (error === 'InvalidCredentials') {
+        toast.error('Invalid email or password. Please try again.');
+      } else if (error === 'AccessDenied') {
+        toast.error('Access denied. You may not have permission to access this resource.');
+      } else if (error === 'VerificationRequired') {
+        toast.error('Email verification required. Please check your email to verify your account.');
       } else {
-        toast.error('An error occurred during authentication.');
+        toast.error(`Authentication error: ${error}`);
       }
+      console.log('Auth error from URL:', error);
     }
   }, [searchParams]);
 
@@ -85,10 +92,6 @@ export default function AuthPage() {
       ...formData,
       [e.target.name]: e.target.value
     });
-  };
-
-  const handleGoogleSignIn = () => {
-    window.location.href = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/google`;
   };
 
   return (
@@ -223,29 +226,11 @@ export default function AuthPage() {
                 )}
 
                 <button 
-                  type="submit" 
-                  className="btn btn-primary auth-submit"
+                  type="submit"
+                  className="btn btn-primary login-btn"
                   disabled={loading}
                 >
-                  {loading ? (
-                    <span className="loading-spinner"></span>
-                  ) : (
-                    isLogin ? 'Sign In' : 'Create Account'
-                  )}
-                </button>
-
-                <div className="auth-divider">
-                  <span>or continue with</span>
-                </div>
-
-                <button 
-                  type="button"
-                  onClick={handleGoogleSignIn}
-                  className="btn btn-outline google-btn"
-                  disabled={loading}
-                >
-                  <FcGoogle className="google-icon" />
-                  Continue with Google
+                  {loading ? <div className="spinner"></div> : (isLogin ? 'Sign In' : 'Sign Up')}
                 </button>
 
                 <p className="auth-switch">
@@ -262,7 +247,7 @@ export default function AuthPage() {
                   <Link href="/auth/forgot-password">Forgot Password?</Link>
                 </p>
                 <p className="auth-switch">
-                  <Link href="/auth/ngo-login">NGO Login</Link>
+                  <Link href="/auth/ngo-login">Organization Login (NGO/Government)</Link>
                 </p>
               </form>
             </div>

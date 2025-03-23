@@ -118,10 +118,6 @@ const userSchema = new Schema({
   },
   resetToken: String,
   resetTokenExpiry: Date,
-  googleId: {
-    type: String,
-    sparse: true
-  },
 }, {
   timestamps: true
 });

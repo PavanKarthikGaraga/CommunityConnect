@@ -1,12 +1,37 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/AuthContext/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Toaster, toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { FiUser, FiMail, FiGlobe, FiLock, FiBriefcase } from 'react-icons/fi';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import './page.css';
+
+// Error handler component
+function ErrorHandler() {
+  const searchParams = useSearchParams();
+  
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error) {
+      if (error === 'AuthFailed') {
+        toast.error('Authentication failed. Please check your credentials and try again.');
+      } else if (error === 'InvalidCredentials') {
+        toast.error('Invalid email or password. Please try again.');
+      } else if (error === 'AccessDenied') {
+        toast.error('Access denied. You may not have permission to access this resource.');
+      } else if (error === 'VerificationRequired') {
+        toast.error('Email verification required. Please check your email to verify your account.');
+      } else {
+        toast.error(`Authentication error: ${error}`);
+      }
+      console.log('Auth error from URL:', error);
+    }
+  }, [searchParams]);
+
+  return null;
+}
 
 export default function NGOAuthPage() {
   const router = useRouter();
@@ -93,6 +118,7 @@ export default function NGOAuthPage() {
   return (
     <div className="ngo-auth-container">
       <Toaster position="top-right" />
+      <ErrorHandler />
       
       <div className="ngo-auth-content">
         <motion.div 
@@ -108,7 +134,7 @@ export default function NGOAuthPage() {
               <div className="shape shape-3"></div>
             </div>
             <h2>{isLogin ? 'Welcome Back!' : 'Join Our Community'}</h2>
-            <p>Empowering NGOs to create lasting social impact</p>
+            <p>Empowering organizations to create lasting social impact</p>
           </div>
         </motion.div>
 
@@ -122,6 +148,7 @@ export default function NGOAuthPage() {
             <h1>{isLogin ? 'Organization Login' : 'Organization Registration'}</h1>
             
             <div className="account-type-selector">
+              <p>Organization Type:</p>
               <button 
                 type="button"
                 className={`type-btn ${accountType === 'NGO' ? 'active' : ''}`}
