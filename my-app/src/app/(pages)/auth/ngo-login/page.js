@@ -13,13 +13,15 @@ export default function NGOAuthPage() {
   const { login } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [accountType, setAccountType] = useState('NGO');
   const [formData, setFormData] = useState({
     organizationName: '',
     email: '',
     website: '',
     representativeName: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    department: ''
   });
 
   const handleSubmit = async (e) => {
@@ -32,7 +34,7 @@ export default function NGOAuthPage() {
         
         if (result.success) {
           toast.success('Welcome back!');
-          router.push('/dashboard/NGO');
+          router.push(`/dashboard/${accountType}`);
         } else {
           toast.error(result.error || 'Invalid credentials');
         }
@@ -49,8 +51,14 @@ export default function NGOAuthPage() {
           website: formData.website,
           representativeName: formData.representativeName,
           password: formData.password,
-          role: 'NGO'
+          role: accountType,
+          department: accountType === 'Government' ? formData.department : undefined
         };
+
+        console.log('Sending registration data:', {
+          ...registrationData,
+          password: '[REDACTED]'
+        });
 
         const response = await fetch('/api/auth/ngo/register', {
           method: 'POST',
@@ -68,8 +76,8 @@ export default function NGOAuthPage() {
         }
       }
     } catch (err) {
-      console.error('Registration error:', err);
-      toast.error('An error occurred during registration');
+      console.error('Auth error:', err);
+      toast.error('An error occurred');
     } finally {
       setLoading(false);
     }
@@ -111,7 +119,24 @@ export default function NGOAuthPage() {
           transition={{ duration: 0.5 }}
         >
           <div className="auth-header">
-            <h1>{isLogin ? 'NGO Login' : 'NGO Registration'}</h1>
+            <h1>{isLogin ? 'Organization Login' : 'Organization Registration'}</h1>
+            
+            <div className="account-type-selector">
+              <button 
+                type="button"
+                className={`type-btn ${accountType === 'NGO' ? 'active' : ''}`}
+                onClick={() => setAccountType('NGO')}
+              >
+                NGO
+              </button>
+              <button 
+                type="button"
+                className={`type-btn ${accountType === 'Government' ? 'active' : ''}`}
+                onClick={() => setAccountType('Government')}
+              >
+                Government
+              </button>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="ngo-auth-form">
@@ -119,10 +144,9 @@ export default function NGOAuthPage() {
               <>
                 <div className="form-group">
                   <div className="input-icon">
-                    {/* <FiBriefcase /> */}
                     <input
                       type="text"
-                      placeholder="Organization Name"
+                      placeholder={`${accountType} Organization Name`}
                       name="organizationName"
                       value={formData.organizationName}
                       onChange={handleChange}
@@ -131,9 +155,23 @@ export default function NGOAuthPage() {
                   </div>
                 </div>
 
+                {accountType === 'Government' && (
+                  <div className="form-group">
+                    <div className="input-icon">
+                      <input
+                        type="text"
+                        placeholder="Department Name"
+                        name="department"
+                        value={formData.department}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div className="form-group">
                   <div className="input-icon">
-                    {/* <FiGlobe /> */}
                     <input
                       type="url"
                       placeholder="Website"
@@ -147,7 +185,6 @@ export default function NGOAuthPage() {
 
                 <div className="form-group">
                   <div className="input-icon">
-                    {/* <FiUser /> */}
                     <input
                       type="text"
                       placeholder="Representative Name"
@@ -163,10 +200,9 @@ export default function NGOAuthPage() {
 
             <div className="form-group">
               <div className="input-icon">
-                {/* <FiMail /> */}
                 <input
                   type="email"
-                  placeholder="Email"
+                  placeholder={`${accountType} Email`}
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
@@ -177,7 +213,6 @@ export default function NGOAuthPage() {
 
             <div className="form-group">
               <div className="input-icon">
-                {/* <FiLock /> */}
                 <input
                   type="password"
                   placeholder="Password"
@@ -192,7 +227,6 @@ export default function NGOAuthPage() {
             {!isLogin && (
               <div className="form-group">
                 <div className="input-icon">
-                  {/* <FiLock /> */}
                   <input
                     type="password"
                     placeholder="Confirm Password"
@@ -215,7 +249,7 @@ export default function NGOAuthPage() {
               className="switch-btn"
               onClick={() => setIsLogin(!isLogin)}
             >
-              {isLogin ? "Don't have an NGO account? Register" : "Already registered? Login"}
+              {isLogin ? "Don't have an account? Register" : "Already registered? Login"}
             </button>
           </div>
         </motion.div>

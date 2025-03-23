@@ -50,12 +50,12 @@ export async function POST(req) {
     await connectDB();
     const body = await req.json();
     
-    console.log('Attempting to register NGO with data:', {
+    console.log('Attempting to register organization with data:', {
       ...body,
       password: '[REDACTED]'
     });
 
-    // Check if user already exists
+    // Check if user exists
     const existingUser = await User.findOne({ email: body.email });
     if (existingUser) {
       return NextResponse.json(
@@ -68,20 +68,25 @@ export async function POST(req) {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(body.password, salt);
 
-    // Prepare user data with proper organization structure
+    // Prepare organization data
+    const organizationData = {
+      name: body.organizationName,
+      website: body.website,
+      verificationStatus: 'Pending',
+      type: body.role, // 'NGO' or 'Government'
+      department: body.role === 'Government' ? (body.department || 'General') : undefined
+    };
+
+    // Prepare user data
     const userData = {
       name: body.organizationName,
       email: body.email,
       password: hashedPassword,
+      role: body.role,
       representativeName: body.representativeName,
-      role: 'NGO',
       status: 'Pending',
       isEmailVerified: false,
-      organization: {
-        name: body.organizationName,
-        website: body.website,
-        verificationStatus: 'Pending'
-      }
+      organization: organizationData
     };
 
     console.log('Creating user with data:', {
@@ -89,7 +94,7 @@ export async function POST(req) {
       password: '[REDACTED]'
     });
 
-    // Create new NGO user
+    // Create new user
     const user = await User.create(userData);
 
     // Create verification token
@@ -99,7 +104,27 @@ export async function POST(req) {
       { expiresIn: '24h' }
     );
 
-    // Send verification email
+    // Create session token
+    const sessionToken = jwt.sign(
+      {
+        id: user._id,
+        email: user.email,
+        role: user.role
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    // Set session cookie
+    const cookieStore = cookies();
+    cookieStore.set('token', sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 // 7 days
+    });
+
+    // Send verification email using the imported function
     await sendNGOVerificationEmail(
       body.organizationName,
       body.email,
@@ -113,7 +138,12 @@ export async function POST(req) {
     });
 
   } catch (error) {
-    console.error('NGO Registration Error:', error);
+    console.error('NGO Registration Error:', {
+      message: error.message,
+      name: error.name,
+      code: error.code,
+      errors: error.errors
+    });
     
     if (error.code === 11000) {
       return NextResponse.json(
@@ -131,7 +161,10 @@ export async function POST(req) {
     }
 
     return NextResponse.json(
-      { error: 'Registration failed. Please try again.' },
+      { 
+        error: 'Registration failed. Please try again.',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
       { status: 500 }
     );
   }

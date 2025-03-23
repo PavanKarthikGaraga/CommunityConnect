@@ -104,19 +104,22 @@ export async function sendWelcomeEmail(name, email) {
   await transporter.sendMail(mailOptions);
 }
 
-export async function sendNGOVerificationEmail(orgName, email, token, repName) {
+export async function sendNGOVerificationEmail(orgName, email, token, repName, role) {
   const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify?token=${token}`;
+  
+  const orgType = role === 'NGO' ? 'NGO' : 'Government Organization';
   
   const mailOptions = {
     from: process.env.SMTP_FROM,
     to: email,
-    subject: 'Verify Your NGO Account - CommunityConnect',
+    subject: `Verify Your ${orgType} Account - CommunityConnect`,
     html: `
       <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
         <h1 style="color: #2d3748; text-align: center;">Welcome to CommunityConnect!</h1>
         <h2 style="color: #4a5568;">Hello ${repName},</h2>
         <p style="color: #4a5568; font-size: 16px; line-height: 1.5;">
-          Thank you for registering ${orgName} with CommunityConnect. To complete your registration and start using our platform, please verify your email address.
+          Thank you for registering ${orgName} as a ${orgType} with CommunityConnect. 
+          To complete your registration and start using our platform, please verify your email address.
         </p>
         <div style="text-align: center; margin: 30px 0;">
           <a href="${verificationUrl}" 

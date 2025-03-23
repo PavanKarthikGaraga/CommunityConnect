@@ -16,14 +16,22 @@ const organizationSchema = new Schema({
     enum: ['Pending', 'Verified', 'Rejected'],
     default: 'Pending'
   },
+  type: {
+    type: String,
+    enum: ['NGO', 'Government'],
+    required: true
+  },
+  department: {
+    type: String,
+    // Only required if type is Government
+    required: function() { 
+      return this.type === 'Government';
+    }
+  },
   registrationNumber: String,
-  address: {
-    street: String,
-    city: String,
-    state: String,
-    country: String,
-    postalCode: String
-  }
+  address: String,
+  state: String,
+  district: String
 });
 
 // Main User schema
@@ -44,11 +52,8 @@ const userSchema = new Schema({
   },
   role: {
     type: String,
-    enum: {
-      values: ['Volunteer', 'NGO', 'Government', 'Admin'],
-      message: '{VALUE} is not a valid role'
-    },
-    required: [true, 'Role is required']
+    enum: ['Volunteer', 'NGO', 'Government', 'Admin'],
+    required: true
   },
   status: {
     type: String,

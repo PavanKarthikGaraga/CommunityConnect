@@ -28,9 +28,12 @@ export async function GET(req) {
     user.status = 'Active';
     await user.save();
 
+    // Redirect based on organization type
+    const redirectPath = user.role === 'NGO' ? '/dashboard/NGO' : '/dashboard/Government';
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/auth/verification-success`
+      `${process.env.NEXT_PUBLIC_APP_URL}${redirectPath}`
     );
+
   } catch (error) {
     return NextResponse.redirect(
       `${process.env.NEXT_PUBLIC_APP_URL}/auth/verification-failed`
