@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import About from './assets/about.avif';
 import FAQ from './components/FAQ';
 import Link from 'next/link';
 
@@ -91,14 +90,18 @@ export default function Home() {
           </div>
           <div className="mission-visual">
             <div className="image-grid">
-              <Image 
-                src={About} 
-                alt="Community Impact" 
-                className="main-image"
-                fill 
-                style={{objectFit: 'cover'}}
-                priority
-              />
+              <div className="placeholder-image" style={{
+                width: '100%',
+                height: '400px',
+                backgroundColor: 'var(--primary-light)',
+                borderRadius: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '2rem'
+              }}>
+                🤝 Community Impact
+              </div>
               <div className="impact-counter">
                 <span className="counter-number">150K+</span>
                 <span className="counter-label">Lives Impacted</span>

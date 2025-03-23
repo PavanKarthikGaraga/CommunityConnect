@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { verifyToken } from '@/config/jwt';
+import { verifyToken } from './config/jwt';
 
 // Define the config for matcher
 export const config = {

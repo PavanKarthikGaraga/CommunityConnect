@@ -26,9 +26,12 @@ export async function verifyToken(token) {
 }
 
 export async function createVerificationToken(email) {
-  const token = await jwt.sign({ email }, JWT_SECRET, { expiresIn: '24h' });
-  return token;
+  return await new SignJWT({ email })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setExpirationTime('24h')
+    .sign(JWT_SECRET);
 }
+
 export async function verifyVerificationToken(token) {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);

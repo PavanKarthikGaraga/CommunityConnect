@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { FiUser, FiLogOut } from 'react-icons/fi';
 import './DashboardNav.css';
-
+import UserProfile from '../../../../public/profile.png';
 export default function DashboardNav() {
   const { user, logout } = useAuth();
 
@@ -27,7 +27,7 @@ export default function DashboardNav() {
             <span className="user-name">{user?.name || 'User'}</span>
             {user?.profileImage ? (
               <Image
-                src={user.profileImage}
+                src={UserProfile}
                 alt={user.name || 'Profile'}
                 width={40}
                 height={40}

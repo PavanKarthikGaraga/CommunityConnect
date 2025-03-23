@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-const { Schema } = mongoose;
+const { Schema, model } = mongoose;
 
 // Define the Organization sub-schema
 const organizationSchema = new Schema({
@@ -34,6 +34,208 @@ const organizationSchema = new Schema({
   district: String
 });
 
+// Project Schema
+const projectSchema = new Schema({
+  title: {
+    type: String,
+    required: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  organization: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  status: {
+    type: String,
+    enum: ['Pending', 'Ongoing', 'Completed', 'Cancelled'],
+    default: 'Pending'
+  },
+  startDate: {
+    type: Date,
+    required: true
+  },
+  endDate: Date,
+  location: {
+    address: String,
+    city: String,
+    state: String,
+    pincode: String
+  },
+  category: {
+    type: String,
+    required: true,
+    enum: ['Education', 'Healthcare', 'Environment', 'Social Welfare', 'Other']
+  },
+  requiredVolunteers: {
+    type: Number,
+    required: true
+  },
+  assignedVolunteers: [{
+    volunteer: {
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    status: {
+      type: String,
+      enum: ['Active', 'Completed', 'Withdrawn'],
+      default: 'Active'
+    },
+    joinedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+// Task Schema
+const taskSchema = new Schema({
+  title: {
+    type: String,
+    required: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  project: {
+    type: Schema.Types.ObjectId,
+    ref: 'Project',
+    required: true
+  },
+  organization: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  assignedTo: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
+  status: {
+    type: String,
+    enum: ['Available', 'In Progress', 'Completed', 'Verified'],
+    default: 'Available'
+  },
+  estimatedHours: {
+    type: Number,
+    required: true
+  },
+  deadline: {
+    type: Date,
+    required: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+// Feedback Schema
+const feedbackSchema = new Schema({
+  from: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  to: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  project: {
+    type: Schema.Types.ObjectId,
+    ref: 'Project'
+  },
+  task: {
+    type: Schema.Types.ObjectId,
+    ref: 'Task'
+  },
+  type: {
+    type: String,
+    enum: ['Question', 'Issue', 'Suggestion', 'Other'],
+    required: true
+  },
+  subject: {
+    type: String,
+    required: true
+  },
+  message: {
+    type: String,
+    required: true
+  },
+  status: {
+    type: String,
+    enum: ['Pending', 'In Progress', 'Resolved', 'Closed'],
+    default: 'Pending'
+  },
+  response: {
+    message: String,
+    respondedBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    respondedAt: Date
+  }
+}, {
+  timestamps: true
+});
+
+// Hours Log Schema
+const hoursLogSchema = new Schema({
+  volunteer: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  task: {
+    type: Schema.Types.ObjectId,
+    ref: 'Task',
+    required: true
+  },
+  project: {
+    type: Schema.Types.ObjectId,
+    ref: 'Project',
+    required: true
+  },
+  hours: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  date: {
+    type: Date,
+    required: true
+  },
+  description: String,
+  status: {
+    type: String,
+    enum: ['Pending', 'Approved', 'Rejected'],
+    default: 'Pending'
+  },
+  verifiedBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  verifiedAt: Date,
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
 // Main User schema
 const userSchema = new Schema({
   name: {
@@ -57,60 +259,26 @@ const userSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ['Active', 'Pending', 'Suspended'],
-    default: 'Pending'
+    enum: ['Pending', 'Active', 'Suspended'],
+    default: 'Active'
   },
-  isEmailVerified: {
-    type: Boolean,
-    default: false
-  },
-  profileImage: {
-    type: String,
-    default: '/default-avatar.png'
-  },
+  organization: organizationSchema,
   representativeName: String,
-  organization: organizationSchema, // Use the organization schema
-  createdAt: {
-    type: Date,
-    default: Date.now
+  profileImage: String,
+  phone: String,
+  skills: [String],
+  interests: [String],
+  totalHours: {
+    type: Number,
+    default: 0
   },
-  volunteer: {
-    interests: [String],
-    skills: [String],
-    availability: {
-      type: String,
-      enum: ['Weekdays', 'Weekends', 'Flexible']
-    },
-    hoursContributed: {
-      type: Number,
-      default: 0
-    }
+  completedTasks: {
+    type: Number,
+    default: 0
   },
-  government: {
-    department: String,
-    jurisdiction: String,
-    position: String,
-    employeeId: String
-  },
-  socialLinks: {
-    linkedin: String,
-    twitter: String,
-    facebook: String
-  },
-  notifications: [{
-    type: {
-      type: String,
-      enum: ['Project', 'Message', 'Update', 'Alert']
-    },
-    message: String,
-    read: {
-      type: Boolean,
-      default: false
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now
-    }
+  badges: [{
+    name: String,
+    earnedAt: Date
   }],
   lastActive: {
     type: Date,
@@ -122,273 +290,9 @@ const userSchema = new Schema({
   timestamps: true
 });
 
-// Delete existing model if it exists (during development)
-if (mongoose.models.User) {
-  delete mongoose.models.User;
-}
-
-// Project Schema
-const ProjectSchema = new Schema({
-  title: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  slug: {
-    type: String,
-    unique: true
-  },
-  description: {
-    short: {
-      type: String,
-      required: true,
-      maxlength: 200
-    },
-    detailed: {
-      type: String,
-      required: true
-    }
-  },
-  category: [{
-    type: String,
-    enum: [
-      'Environment',
-      'Healthcare',
-      'Education',
-      'Community',
-      'Technology',
-      'Arts',
-      'Sports',
-      'Emergency Response'
-    ],
-    required: true
-  }],
-  location: {
-    type: {
-      type: String,
-      enum: ['Point'],
-      default: 'Point'
-    },
-    coordinates: {
-      type: [Number],
-      required: true
-    },
-    address: {
-      street: String,
-      city: String,
-      state: String,
-      country: String,
-      postalCode: String
-    }
-  },
-  timeline: {
-    startDate: Date,
-    endDate: Date,
-    milestones: [{
-      title: String,
-      description: String,
-      dueDate: Date,
-      completed: {
-        type: Boolean,
-        default: false
-      }
-    }]
-  },
-  requirements: {
-    volunteersNeeded: Number,
-    skills: [String],
-    resources: [{
-      item: String,
-      quantity: Number,
-      acquired: {
-        type: Number,
-        default: 0
-      }
-    }]
-  },
-  team: {
-    leader: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
-    },
-    volunteers: [{
-      user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-      },
-      role: String,
-      joinedAt: {
-        type: Date,
-        default: Date.now
-      },
-      status: {
-        type: String,
-        enum: ['Active', 'Inactive'],
-        default: 'Active'
-      }
-    }]
-  },
-  status: {
-    type: String,
-    enum: ['Draft', 'Open', 'In Progress', 'Completed', 'Cancelled'],
-    default: 'Draft'
-  },
-  visibility: {
-    type: String,
-    enum: ['Public', 'Private', 'Invitation'],
-    default: 'Public'
-  },
-  media: {
-    images: [String],
-    videos: [String],
-    documents: [String]
-  },
-  impactMetrics: {
-    volunteersInvolved: {
-      type: Number,
-      default: 0
-    },
-    hoursContributed: {
-      type: Number,
-      default: 0
-    },
-    peopleImpacted: {
-      type: Number,
-      default: 0
-    },
-    fundsRaised: {
-      type: Number,
-      default: 0
-    },
-    customMetrics: [{
-      name: String,
-      value: Schema.Types.Mixed
-    }]
-  },
-  updates: [{
-    title: String,
-    content: String,
-    author: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    media: [String],
-    createdAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
-});
-
-// Collaboration Schema
-const CollaborationSchema = new Schema({
-  project: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Project',
-    required: true
-  },
-  partners: [{
-    organization: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    role: String,
-    joinedAt: {
-      type: Date,
-      default: Date.now
-    },
-    status: {
-      type: String,
-      enum: ['Pending', 'Active', 'Inactive'],
-      default: 'Pending'
-    }
-  }],
-  approvals: [{
-    authority: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    status: {
-      type: String,
-      enum: ['Pending', 'Approved', 'Rejected'],
-      default: 'Pending'
-    },
-    comments: String,
-    date: {
-      type: Date,
-      default: Date.now
-    }
-  }],
-  meetings: [{
-    title: String,
-    date: Date,
-    location: String,
-    attendees: [{
-      user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-      },
-      status: {
-        type: String,
-        enum: ['Pending', 'Attending', 'Not Attending'],
-        default: 'Pending'
-      }
-    }],
-    notes: String
-  }],
-  documents: [{
-    title: String,
-    type: String,
-    url: String,
-    uploadedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    uploadedAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
-});
-
-// Add indexes
-ProjectSchema.index({ 
-  title: 'text', 
-  'description.short': 'text', 
-  'description.detailed': 'text' 
-});
-ProjectSchema.index({ 'location.coordinates': '2dsphere' });
-
-// Add pre-save hooks for slug generation
-ProjectSchema.pre('save', function(next) {
-  if (this.isModified('title')) {
-    this.slug = this.title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '');
-  }
-  if (this.isModified()) {
-    this.updatedAt = Date.now();
-  }
-  next();
-});
-
-// Models
-const User = mongoose.model('User', userSchema);
-const Project = mongoose.models.Project || mongoose.model('Project', ProjectSchema);
-const Collaboration = mongoose.models.Collaboration || mongoose.model('Collaboration', CollaborationSchema);
-
-export { User, Project, Collaboration };
+// Create and export models
+export const User = mongoose.models.User || mongoose.model('User', userSchema);
+export const Project = mongoose.models.Project || mongoose.model('Project', projectSchema);
+export const Task = mongoose.models.Task || mongoose.model('Task', taskSchema);
+export const Feedback = mongoose.models.Feedback || mongoose.model('Feedback', feedbackSchema);
+export const HoursLog = mongoose.models.HoursLog || mongoose.model('HoursLog', hoursLogSchema);
