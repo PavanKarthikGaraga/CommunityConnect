@@ -200,9 +200,6 @@ export default function AuthPage() {
                       required
                       placeholder="Enter your password"
                     />
-                    <Link href="/auth/forgot-password" className="forgot-password-link">
-                      Forgot password?
-                    </Link>
                   </div>
                 </div>
 
@@ -260,6 +257,12 @@ export default function AuthPage() {
                   >
                     {isLogin ? 'Sign Up' : 'Sign In'}
                   </button>
+                </p>
+                <p className="auth-switch">
+                  <Link href="/auth/forgot-password">Forgot Password?</Link>
+                </p>
+                <p className="auth-switch">
+                  <Link href="/auth/ngo-login">NGO Login</Link>
                 </p>
               </form>
             </div>

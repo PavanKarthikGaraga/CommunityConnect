@@ -2,16 +2,17 @@ import { NextResponse } from 'next/server';
 import { verifyToken } from '@/config/jwt';
 import { cookies } from 'next/headers';
 
-export async function GET() {
+export async function GET(req) {
   try {
     const cookieStore = cookies();
     const token = cookieStore.get('token');
+    const tokenValue = token?.value;
 
-    if (!token) {
+    if (!tokenValue) {
       return NextResponse.json({ authenticated: false }, { status: 401 });
     }
 
-    const decoded = await verifyToken(token.value);
+    const decoded = await verifyToken(tokenValue);
     if (!decoded) {
       return NextResponse.json({ authenticated: false }, { status: 401 });
     }

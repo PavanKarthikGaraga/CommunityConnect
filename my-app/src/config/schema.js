@@ -1,44 +1,74 @@
 import mongoose from 'mongoose';
+const { Schema } = mongoose;
 
-const Schema = mongoose.Schema;
-
-// User Schema
-const UserSchema = new Schema({
+// Define the Organization sub-schema
+const organizationSchema = new Schema({
   name: {
     type: String,
-    required: true,
-    trim: true
+    required: true
+  },
+  website: {
+    type: String,
+    required: true
+  },
+  verificationStatus: {
+    type: String,
+    enum: ['Pending', 'Verified', 'Rejected'],
+    default: 'Pending'
+  },
+  registrationNumber: String,
+  address: {
+    street: String,
+    city: String,
+    state: String,
+    country: String,
+    postalCode: String
+  }
+});
+
+// Main User schema
+const userSchema = new Schema({
+  name: {
+    type: String,
+    required: [true, 'Name is required']
   },
   email: {
     type: String,
-    required: true,
+    required: [true, 'Email is required'],
     unique: true,
-    lowercase: true,
-    trim: true
+    lowercase: true
   },
   password: {
     type: String,
-    required: function() {
-      // Only require password if googleId is not present
-      return !this.googleId;
-    }
+    required: [true, 'Password is required']
   },
   role: {
     type: String,
-    required: true,
-    default: 'Volunteer',
-    enum: ['Volunteer', 'Admin']
+    enum: {
+      values: ['Volunteer', 'NGO', 'Government', 'Admin'],
+      message: '{VALUE} is not a valid role'
+    },
+    required: [true, 'Role is required']
+  },
+  status: {
+    type: String,
+    enum: ['Active', 'Pending', 'Suspended'],
+    default: 'Pending'
+  },
+  isEmailVerified: {
+    type: Boolean,
+    default: false
   },
   profileImage: {
     type: String,
     default: '/default-avatar.png'
   },
-  status: {
-    type: String,
-    enum: ['Active', 'Inactive', 'Pending', 'Blocked'],
-    default: 'Pending'
+  representativeName: String,
+  organization: organizationSchema, // Use the organization schema
+  createdAt: {
+    type: Date,
+    default: Date.now
   },
-  // Role-specific fields
   volunteer: {
     interests: [String],
     skills: [String],
@@ -49,24 +79,6 @@ const UserSchema = new Schema({
     hoursContributed: {
       type: Number,
       default: 0
-    }
-  },
-  organization: {
-    name: String,
-    type: String,
-    registrationNumber: String,
-    website: String,
-    address: {
-      street: String,
-      city: String,
-      state: String,
-      country: String,
-      postalCode: String
-    },
-    verificationStatus: {
-      type: String,
-      enum: ['Pending', 'Verified', 'Rejected'],
-      default: 'Pending'
     }
   },
   government: {
@@ -95,10 +107,6 @@ const UserSchema = new Schema({
       default: Date.now
     }
   }],
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
   lastActive: {
     type: Date,
     default: Date.now
@@ -112,6 +120,11 @@ const UserSchema = new Schema({
 }, {
   timestamps: true
 });
+
+// Delete existing model if it exists (during development)
+if (mongoose.models.User) {
+  delete mongoose.models.User;
+}
 
 // Project Schema
 const ProjectSchema = new Schema({
@@ -373,7 +386,7 @@ ProjectSchema.pre('save', function(next) {
 });
 
 // Models
-const User = mongoose.models.User || mongoose.model('User', UserSchema);
+const User = mongoose.model('User', userSchema);
 const Project = mongoose.models.Project || mongoose.model('Project', ProjectSchema);
 const Collaboration = mongoose.models.Collaboration || mongoose.model('Collaboration', CollaborationSchema);
 

@@ -1,20 +1,18 @@
 import nodemailer from 'nodemailer';
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
+// Create and export the transporter
+export const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: process.env.SMTP_PORT,
+  secure: true, // true for 465, false for other ports
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
-  tls: {
-    rejectUnauthorized: false // Only use this in development
-  }
 });
 
-// Verify transporter connection
-transporter.verify(function(error, success) {
+// Test the connection
+transporter.verify(function (error, success) {
   if (error) {
     console.log('SMTP Error:', error);
   } else {
@@ -101,6 +99,36 @@ export async function sendWelcomeEmail(name, email) {
         </div>
       </div>
     `,
+  };
+
+  await transporter.sendMail(mailOptions);
+}
+
+export async function sendNGOVerificationEmail(orgName, email, token, repName) {
+  const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify?token=${token}`;
+  
+  const mailOptions = {
+    from: process.env.SMTP_FROM,
+    to: email,
+    subject: 'Verify Your NGO Account - CommunityConnect',
+    html: `
+      <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+        <h1 style="color: #2d3748; text-align: center;">Welcome to CommunityConnect!</h1>
+        <h2 style="color: #4a5568;">Hello ${repName},</h2>
+        <p style="color: #4a5568; font-size: 16px; line-height: 1.5;">
+          Thank you for registering ${orgName} with CommunityConnect. To complete your registration and start using our platform, please verify your email address.
+        </p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${verificationUrl}" 
+             style="background-color: #4299e1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+            Verify Email Address
+          </a>
+        </div>
+        <p style="color: #718096; font-size: 14px;">
+          This verification link will expire in 24 hours. If you did not create this account, please ignore this email.
+        </p>
+      </div>
+    `
   };
 
   await transporter.sendMail(mailOptions);

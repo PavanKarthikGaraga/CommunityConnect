@@ -24,3 +24,17 @@ export async function verifyToken(token) {
     return null;
   }
 }
+
+export async function createVerificationToken(email) {
+  const token = await jwt.sign({ email }, JWT_SECRET, { expiresIn: '24h' });
+  return token;
+}
+export async function verifyVerificationToken(token) {
+  try {
+    const { payload } = await jwtVerify(token, JWT_SECRET);
+    return payload;
+  } catch (error) {
+    console.error('Verification token verification error:', error);
+    return null;
+  }
+}
