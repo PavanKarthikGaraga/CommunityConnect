@@ -47,7 +47,17 @@ const sendVerificationEmail = async (email, name, token) => {
 
 export async function POST(req) {
   try {
-    await connectDB();
+    // Connect to database with improved error handling
+    try {
+      await connectDB();
+    } catch (dbError) {
+      console.error('Database connection error:', dbError.message);
+      return NextResponse.json(
+        { error: 'Database connection failed. Please try again later.' },
+        { status: 500 }
+      );
+    }
+
     const body = await req.json();
     
     console.log('Attempting to register organization with data:', {
@@ -115,7 +125,7 @@ export async function POST(req) {
       { expiresIn: '7d' }
     );
 
-    // Set session cookie
+    // Set session cookie - fix for async cookies API
     const cookieStore = cookies();
     cookieStore.set('token', sessionToken, {
       httpOnly: true,

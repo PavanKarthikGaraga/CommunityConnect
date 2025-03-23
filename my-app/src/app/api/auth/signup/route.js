@@ -9,8 +9,18 @@ import { sendWelcomeEmail } from '@/lib/email';
 export async function POST(req) {
   try {
     console.log('Starting signup process...');
-    await connectDB();
-    console.log('Connected to database');
+    
+    // Connect to database with improved error handling
+    try {
+      await connectDB();
+      console.log('Connected to database');
+    } catch (dbError) {
+      console.error('Database connection error:', dbError.message);
+      return NextResponse.json(
+        { error: 'Database connection failed. Please try again later.' },
+        { status: 500 }
+      );
+    }
     
     const { name, email, password, role = 'Volunteer' } = await req.json();
     console.log('Received data:', { name, email, role }); // Don't log password
@@ -49,11 +59,9 @@ export async function POST(req) {
       role: user.role
     });
 
-    // Get cookies instance once
+    // Set cookie - fix for async cookies API
     const cookieStore = cookies();
-    
-    // Set cookie
-    await cookieStore.set('token', token, {
+    cookieStore.set('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
