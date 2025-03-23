@@ -11,7 +11,8 @@ import {
   FaClock,
   FaBell,
   FaChartLine,
-  FaCog
+  FaCog,
+  FaSpinner
 } from 'react-icons/fa';
 import {
   LineChart,
@@ -24,37 +25,13 @@ import {
 } from 'recharts';
 import './page.css';
 
-const dummyData = {
-  stats: {
-    treesPlanted: 45,
-    eventsAttended: 12,
-    volunteerHours: 156,
-    upcomingEvents: 3
-  },
-  activityData: [
-    { month: 'Jan', hours: 20 },
-    { month: 'Feb', hours: 35 },
-    { month: 'Mar', hours: 25 },
-    { month: 'Apr', hours: 45 },
-    { month: 'May', hours: 30 },
-    { month: 'Jun', hours: 50 }
-  ],
-  upcomingEvents: [
-    { id: 1, name: "Beach Cleanup Drive", date: "2024-04-22", location: "Miami Beach" },
-    { id: 2, name: "Tree Planting Day", date: "2024-04-25", location: "City Park" },
-    { id: 3, name: "Wildlife Conservation", date: "2024-05-01", location: "Nature Reserve" }
-  ],
-  recentBadges: [
-    { id: 1, name: "Tree Champion", icon: "🌳", date: "2024-03-15" },
-    { id: 2, name: "Beach Guardian", icon: "🏖️", date: "2024-03-01" },
-    { id: 3, name: "Wildlife Protector", icon: "🦁", date: "2024-02-15" }
-  ]
-};
-
 export default function VolunteerDashboard() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [dashboardData, setDashboardData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -64,7 +41,47 @@ export default function VolunteerDashboard() {
     }
   }, [user, loading, router]);
 
-  if (loading) return <div className="dashboard-loading">Loading...</div>;
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const response = await fetch('/api/volunteer/dashboard');
+        if (!response.ok) {
+          throw new Error('Failed to fetch dashboard data');
+        }
+        const data = await response.json();
+        setDashboardData(data);
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+        console.error('Error fetching dashboard data:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (user && !loading) {
+      fetchDashboardData();
+    }
+  }, [user, loading]);
+
+  if (loading || isLoading) {
+    return (
+      <div className="dashboard-loading">
+        <FaSpinner className="spinner" />
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="dashboard-error">
+        <p>Error: {error}</p>
+        <button onClick={() => window.location.reload()}>Retry</button>
+      </div>
+    );
+  }
+
   if (!user) return null;
 
   const renderContent = () => {
@@ -84,21 +101,21 @@ export default function VolunteerDashboard() {
                   <FaTree className="stat-icon" />
                   <div className="stat-info">
                     <h3>Trees Planted</h3>
-                    <p>{dummyData.stats.treesPlanted}</p>
+                    <p>{dashboardData?.stats.treesPlanted || 0}</p>
                   </div>
                 </div>
                 <div className="stat-card">
                   <FaCalendarAlt className="stat-icon" />
                   <div className="stat-info">
                     <h3>Events Attended</h3>
-                    <p>{dummyData.stats.eventsAttended}</p>
+                    <p>{dashboardData?.stats.eventsAttended || 0}</p>
                   </div>
                 </div>
                 <div className="stat-card">
                   <FaClock className="stat-icon" />
                   <div className="stat-info">
                     <h3>Volunteer Hours</h3>
-                    <p>{dummyData.stats.volunteerHours}</p>
+                    <p>{dashboardData?.stats.volunteerHours || 0}</p>
                   </div>
                 </div>
               </div>
@@ -107,7 +124,7 @@ export default function VolunteerDashboard() {
               <div className="chart-container">
                 <h2>Your Activity</h2>
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={dummyData.activityData}>
+                  <LineChart data={dashboardData?.activityData || []}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
@@ -128,7 +145,7 @@ export default function VolunteerDashboard() {
                 <div className="events-container">
                   <h2>Upcoming Events</h2>
                   <div className="events-list">
-                    {dummyData.upcomingEvents.map(event => (
+                    {dashboardData?.upcomingEvents.map(event => (
                       <div key={event.id} className="event-card">
                         <div className="event-date">
                           {new Date(event.date).toLocaleDateString('en-US', {
@@ -142,6 +159,9 @@ export default function VolunteerDashboard() {
                         </div>
                       </div>
                     ))}
+                    {dashboardData?.upcomingEvents.length === 0 && (
+                      <p className="no-data">No upcoming events</p>
+                    )}
                   </div>
                 </div>
 
@@ -149,7 +169,7 @@ export default function VolunteerDashboard() {
                 <div className="badges-container">
                   <h2>Recent Achievements</h2>
                   <div className="badges-list">
-                    {dummyData.recentBadges.map(badge => (
+                    {dashboardData?.recentBadges.map(badge => (
                       <div key={badge.id} className="badge-card">
                         <span className="badge-icon">{badge.icon}</span>
                         <div className="badge-info">
@@ -158,6 +178,9 @@ export default function VolunteerDashboard() {
                         </div>
                       </div>
                     ))}
+                    {dashboardData?.recentBadges.length === 0 && (
+                      <p className="no-data">No badges earned yet</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -260,16 +283,8 @@ export default function VolunteerDashboard() {
             <FaBell />
             <span className="nav-text">Notifications</span>
           </button>
-          <button 
-            className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`}
-            onClick={() => setActiveTab('settings')}
-          >
-            <FaCog />
-            <span className="nav-text">Settings</span>
-          </button>
         </nav>
       </aside>
-
       <main className="dashboard-main">
         {renderContent()}
       </main>
